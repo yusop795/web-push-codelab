@@ -19,14 +19,19 @@ event.waitUntil()
 실행 상태로 유지할 것
 */
 self.addEventListener('push', function (event) {
-    console.log('[Service Worker] Push Received.');
-    console.log(`[Service Worker] Push had this data: "${event.data.text()}"`);
+    console.log('[Service Worker] 푸시 알림 도착');
+    console.log(`[Service Worker] 푸시 알림에서 보낸 메시지: "${event.data.text()}"`);
 
-    const title = 'Take me Home';
+    var message = JSON.parse(event.data.text());
+
+    console.log('받은 메시지 JSON 변환 완료 >', message);
+    const title = message.title;
     const options = {
-        body: '휴 많이 힘드네요 얼른 쉬고 싶어요!',
-        icon: 'https://t1.daumcdn.net/cfile/tistory/994BEF355CD0313D05',
-        badge: 'images/badge.png'
+        body: message.body,
+        icon: message.icon,
+        badge: 'images/badge.png',
+        data: message.data,
+        direct: message.direct,
     };
 
     event.waitUntil(self.registration.showNotification(title, options));
@@ -48,14 +53,15 @@ event.waitUntil(notificationPromise);
  * 
  */
 self.addEventListener('notificationclick', function (event) {
-    console.log('[Service Worker] Notification click Received.');
-
+    console.log('[Service Worker] Notification click Received.', event.notification);
     event.notification.close();
 
     /* https://www.youtube.com/watch?v=KO7S0JCec7Q */
     /* https://www.youtube.com/watch?v=g8BV0rvbmOc */
+    /* https://www.youtube.com/watch?v=03Sdc8qMcbA */
+
 
     event.waitUntil(
-        clients.openWindow('https://www.youtube.com/watch?v=ZWue6i_LRZ4')
+        clients.openWindow(event.notification.data)
     );
 });
